@@ -64,15 +64,81 @@
     <!-- BEGIN - Les tests -->
     <script>
       QUnit.test("header tests", function (assert) {
-        assert.ok(false);
+        assert.equal($('table tr th')[0].innerHTML, 'First name');
+        assert.equal($('table tr th')[1].innerHTML, 'Last name');
+        assert.equal($('table tr th')[2].innerHTML, 'Phones');
+        assert.equal($('table tr th')[3].innerHTML, 'Mails');
+        assert.equal($('table tr th')[4].innerHTML, 'Tags');
+        assert.equal($('table tr th')[5].innerHTML, 'Actions');
       });
 
       QUnit.test("list tests", function (assert) {
-        assert.ok(false);
+         var c=Contact.Contacts.instance();
+         var it=c.iterator();
+         var cpt=0;
+         while(it.hasNext()){
+             var t=it.next();
+             $('table tr td')
+             var first=t.firstName();
+             var last=t.lastName();
+             assert.equal($('table tr td')[cpt].innerHTML, first);
+             assert.equal($('table tr td')[cpt+1].innerHTML, last);
+             cpt+=6;
+         }
       });
 
       QUnit.test("first entry tests", function (assert) {
-        assert.ok(false);
+
+          var str= $('table tr td')[2].innerHTML;
+          var tel1="";
+          var tel2="";
+          var cpt=0;
+          for(var i=0;i<str.length;i++){
+              var ascii=str.charCodeAt(i);
+              var myChar=str.charAt(i);
+              if(ascii >= 48 && ascii <=57){
+                  if(cpt==0){
+                      tel1+=myChar;
+                  }
+                  if(cpt==1){
+                      tel2+=myChar;
+                  }
+              }else{
+                  cpt=1;
+              }
+          }
+          str=$('table tr td')[3].innerHTML;
+          var mail1="";
+          var mail2="";
+          cpt=0;
+          var lock=1;
+          for(var i=0;i<str.length;i++){
+              var ascii=str.charCodeAt(i);
+              var myChar=str.charAt(i);
+              if(ascii == 91){
+                  cpt=1;
+                  lock=0;
+              }
+              if(lock == 1){
+                  if(cpt==0){
+                      mail1+=myChar;
+                  }else{
+                      mail2+=myChar;
+                  }
+              }
+              if(ascii == 47){
+                  lock=1;
+              }
+
+          }
+          assert.equal($('table tr td')[0].innerHTML, 'Eric');
+          assert.equal($('table tr td')[1].innerHTML, 'RAMAT');
+          assert.equal(tel1,"0616642258");
+          assert.equal(tel2,"0321465676");
+          assert.equal(mail1, "ramat@lisic.univ-littoral.fr" );
+          assert.equal(mail2, "eric.ramat@gmail.com" );
+          assert.equal($('table tr td')[4].innerHTML, "prof");
+
       });
 
       QUnit.test("remove contact tests", function (assert) {
