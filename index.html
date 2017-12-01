@@ -142,11 +142,43 @@
       });
 
       QUnit.test("remove contact tests", function (assert) {
-        assert.ok(false);
+        var html_before=$('table tr td')[0].innerHTML;
+        var c=Contact.Contacts.instance();
+        var it=c.iterator();
+        var first_name_before=it.next().firstName();
+        var size_before=c.size();
+        $('.btn').trigger('click');
+
+        c=Contact.Contacts.instance();
+        it=c.iterator();
+        var first_name_after=it.next().firstName();
+        var size_after=c.size;
+        var html_after=$('table tr td')[0].innerHTML;
+        assert.ok(html_after !== html_before);
+        assert.ok(first_name_before !== first_name_after);
+        assert.ok(size_after !== size_before);
       });
 
       QUnit.test("sort contact tests", function (assert) {
-        assert.ok(false);
+          var getFirstNamesFromHtml= function () {
+              var arr_html=[];
+              var nb_contacts=$('table tr td').length%$('table tr').length;
+              for(var i=0;i<nb_contacts;i++){
+                  arr_html.push($('table tr td')[1+i*6].innerHTML);
+              }
+              return arr_html;
+          };
+          var arr_html_sorted_with_function=getFirstNamesFromHtml();
+          arr_html_sorted_with_function.sort();
+          $('#button_sort').trigger('click');
+          var arr_html_sorted_with_button=getFirstNamesFromHtml();
+          var isSame=true;
+          for(var i = 0;i<arr_html_sorted_with_function.length;i++){
+              if(arr_html_sorted_with_function[i] !== arr_html_sorted_with_button[i]){
+                  isSame=false;
+              }
+          }
+          assert.ok(isSame);
       });
     </script>
     <!-- END - Les tests -->
