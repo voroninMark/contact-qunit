@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Contacts</title>
+
+    <link rel="stylesheet" href="css/qunit-2.4.1.css">
+    <link rel="stylesheet" href="css/contact.css">
+    <script src="js/qunit-2.4.1.js"></script>
+    <script src="js/jquery-2.2.4.min.js"></script>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/bootstrap.min.js"></script>
+
+    <script src="src/phone.js"></script>
+    <script src="src/mail.js"></script>
+    <script src="src/contact.js"></script>
+    <script src="src/contacts.js"></script>
+    <script src="src/builder.js"></script>
+    <script src="src/contactIterator.js"></script>
+    <script src="src/storage.js"></script>
+
+    <script src="src/view.js"></script>
+    <script src="src/model.js"></script>
+    <script src="src/controller.js"></script>
+
+    <!-- BEGIN - La fonction de construction -->
+    <script>
+        var build = function () {
+            var model = new Contact.Model();
+            var view = new Contact.View(model);
+            var controller = new Contact.Controller(model, view);
+        };
+
+        var init = function () {
+            var contact = new Contact.Builder().createContactWithProfessionalMobile(
+                Contact.Gender.MR, 'Eric', 'RAMAT', '0616642258');
+
+            contact.addPhone(new Contact.Phone('0321465676', Contact.PhoneCategory.PRO, Contact.PhoneType.PHONE));
+            contact.addMail(new Contact.Mail('ramat@lisic.univ-littoral.fr', Contact.MailCategory.PRO));
+            contact.addMail(new Contact.Mail('eric.ramat@gmail.com', Contact.MailCategory.PERSO));
+            contact.addTag('prof');
+            Contact.Contacts.instance().add(contact);
+            Contact.Contacts.instance().add(new Contact.Builder().createContactWithProfessionalMobile(
+                Contact.Gender.MR, 'Jacques', 'DURAND', '0699785487'));
+            Contact.Contacts.instance().add(new Contact.Builder().createContactWithProfessionalMobile(
+                Contact.Gender.MR, 'Pierre', 'DUPONT', '0636532535'));
+            Contact.Contacts.instance().add(new Contact.Builder().createContactWithProfessionalMobile(
+                Contact.Gender.MR, 'Jean', 'DUPOND', '0612343000'));
+        }
+    </script>
+    <!-- END - La fonction de construction -->
+
+
+    <script>
+        $(document).ready(function () {
+            init();
+            build();
+        });
+        var correctInput=function(param){
+            var str=$(param).val();
+            if(str.length<=0) return false;
+            for(var i = 0;i<str.length;i++){
+                if((str.charAt(i) < 65 || str.charAt(i)>90) &&
+                    (str.charAt(i) <97 || str.charAt(i)>122)){
+                    return false;
+                }
+            }
+            return true;
+        };
+        var isEmail=function(){
+            return $('#email').val().indexOf('@') != -1 && $('#email').val().length > 0;
+        };
+        var makeJeanValjean=function () {
+            $("#firstName").val("Jean",true);
+            $("#lastName").val("Valjean",true);
+            $("#email").val("jean.valjean@gmail.com",true);
+        };
+        $(document).on('click','#add',function(){
+            var f=$("#firstName").val();
+            var l=$("#lastName").val();
+            var e=$("#email").val();
+            if(isEmail() && correctInput('#firstName') && correctInput('#lastName')){
+                Contact.Contacts.instance().add(new Contact.Builder().createContactWithProfessionalMail(
+                    Contact.Gender.MR,f,l,e));
+                $("#ok").attr("style","color:green;")
+                $("#ok").html("passed");
+            }else{
+                $("#ok").attr("style","color:red;")
+                $("#ok").html("failed");
+            }
+        });
+        $(document).on('click','#cancel',function(){
+            $(".myForm").val("",true);
+            $("#ok").attr("style","color:red;")
+            $("#ok").html("canceled");
+        });
+    </script>
+    <script>
+        QUnit.test("struct_test", function (assert) {
+            assert.ok($('input.myForm').length===3);
+            assert.ok($('input#add').length===1);
+            assert.ok($('input#cancel').length===1);
+
+        });
+        QUnit.test("check_add", function (assert) {
+            $(".myForm").val("",true);
+            var size_before=Contact.Contacts.instance().size();
+            var check_info_before_false=isEmail() && correctInput('#firstName') && correctInput('#lastName');
+            $('#add').trigger('click');
+            var size_after_click_false_info=Contact.Contacts.instance().size();
+            makeJeanValjean();
+            var check_info_before_true=isEmail() && correctInput('#firstName') && correctInput('#lastName');
+            $('#add').trigger('click');
+            var size_after_click_true_info=Contact.Contacts.instance().size();
+            assert.ok(
+                size_before === size_after_click_false_info
+                && !check_info_before_false
+                && size_after_click_true_info === size_before + 1
+                && check_info_before_true);
+        });
+        QUnit.test("check_cancel", function (assert) {
+            makeJeanValjean();
+            var size_before=Contact.Contacts.instance().size();
+            $('#cancel').trigger('click');
+            var size_after=Contact.Contacts.instance().size();
+            assert.ok(size_before === size_after);
+        });
+    </script>
+</head>
+<body>
+First Name : <input type="text" id="firstName" class="myForm" /></br>
+Last Name : <input type="text" id="lastName" class="myForm" /></br>
+Email : <input type="text" id="email" class="myForm" /></br>
+<input type="button" id="add" value="Ajouter" />
+<input type="button" id="cancel" value="Annuler" /><p id="ok" style="color:green;"></p></br>
+<div id="qunit"></div>
+</body>
+</html>
